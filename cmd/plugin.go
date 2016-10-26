@@ -20,7 +20,6 @@ var pluginCmd = &cobra.Command{
   NOTE: this is an internal command and you should not call it yourself.
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println(args)
 		if len(args) != 1 {
 			return fmt.Errorf("Wrong number of args; expected: do internal-plugin pluginName")
 		}
@@ -31,12 +30,11 @@ var pluginCmd = &cobra.Command{
 		if !found {
 			return fmt.Errorf("Could not load provider: %s", pluginName)
 		}
-		log.Printf("[INFO] Starting provider plugin %s", pluginName)
+		log.Printf("[INFO] Starting provider plugin \"%s\"", pluginName)
 
 		acPlugin.Serve(&acPlugin.ServeOpts{
 			ActionFunc: pluginFunc,
 		})
-
 		return nil
 	},
 }

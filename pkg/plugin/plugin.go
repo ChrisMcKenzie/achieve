@@ -5,26 +5,20 @@ import (
 	"github.com/hashicorp/go-plugin"
 )
 
-// The constants below are the names of the plugins that can be dispensed
-// from the plugin server.
-const (
-	ProviderPluginName    = "provider"
-	ProvisionerPluginName = "provisioner"
-)
+var PluginMap = map[string]plugin.Plugin{
+	"action": &ActionProviderPlugin{},
+}
 
 // Handshake is the HandshakeConfig used to configure clients and servers.
 var Handshake = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "TF_PLUGIN_MAGIC_COOKIE",
-	MagicCookieValue: "d602bf8f470bc67ca7faa0386276bbdd4330efaf76d1a219cb4d6991ca9872b2",
+	MagicCookieKey:   "AC_PLUGIN_MAGIC_COOKIE",
+	MagicCookieValue: "secret-cat",
 }
-
-// ActionFunc ...
-type ActionFunc func() achieve.ActionProvider
 
 // ServeOpts are the configurations to serve a plugin.
 type ServeOpts struct {
-	ActionFunc ActionFunc
+	ActionFunc achieve.ActionProviderFunc
 }
 
 // Serve serves a plugin. This function never returns and should be the final

@@ -13,3 +13,5 @@ type ActionProvider interface {
 	Execute(*Action) error
 	Configure(c *ProviderConfig) error
 }
+
+type ActionProviderFactory func() (ActionProvider, error)

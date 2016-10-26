@@ -4,6 +4,8 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/ChrisMcKenzie/achieve/pkg"
@@ -20,7 +22,10 @@ var RootCmd = &cobra.Command{
 	Long:  ``,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 && args[0] == "internal-plugin" {
-			return pluginCmd.RunE(pluginCmd, args[1:])
+			err := pluginCmd.RunE(pluginCmd, args[1:])
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -35,12 +40,22 @@ var RootCmd = &cobra.Command{
 			cfgFile = "tasks.hcl"
 		}
 
+		// We don't want to see the plugin logs.
+		log.SetOutput(ioutil.Discard)
+
+		rootCfg := DefaultConfig
+		err := rootCfg.LoadPlugins()
+		if err != nil {
+			return err
+		}
+
 		config, err := achieve.LoadConfig(cfgFile)
 		if err != nil {
 			return err
 		}
 
 		ctx = NewContext(taskName, config)
+		ctx.Providers = rootCfg.ActionProviderFactories()
 
 		fmt.Printf("Executing Task %s\n", taskName)
 		ctx.Execute()

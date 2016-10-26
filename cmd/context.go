@@ -10,13 +10,18 @@ import (
 
 // Context ...
 type Context struct {
-	Config *achieve.Config
-	task   string
+	Config    *achieve.Config
+	Providers map[string]achieve.ActionProviderFactory
+
+	task string
 }
 
 // NewContext returns a new Context
 func NewContext(task string, conf *achieve.Config) *Context {
-	return &Context{conf, task}
+	return &Context{
+		Config: conf,
+		task:   task,
+	}
 }
 
 // Execute ...
@@ -36,14 +41,17 @@ func (ctx *Context) Execute() {
 }
 
 func (ctx *Context) executeAction(action *achieve.Action) error {
-	provider, ok := InternalActions[action.Provider]
+	provider, ok := ctx.Providers[action.Provider]
 	if !ok {
 		return fmt.Errorf("Action provider %s not found\n", action.Name)
 	}
-	ap := provider()
+	ap, err := provider()
+	if err != nil {
+		return err
+	}
 
 	pc, _ := ctx.Config.GetProviderConfig(action.Provider)
-	err := ap.Configure(pc)
+	err = ap.Configure(pc)
 	if err != nil {
 		return err
 	}

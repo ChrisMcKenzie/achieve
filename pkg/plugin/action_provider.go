@@ -9,7 +9,7 @@ import (
 
 // ActionProviderPlugin is the plugin.Plugin implementation.
 type ActionProviderPlugin struct {
-	F ActionFunc
+	F achieve.ActionProviderFunc
 }
 
 func (p *ActionProviderPlugin) Server(b *plugin.MuxBroker) (interface{}, error) {
@@ -41,6 +41,19 @@ func (p *ActionProvider) Execute(action *achieve.Action) error {
 	return nil
 }
 
+func (p *ActionProvider) Configure(conf *achieve.ProviderConfig) error {
+	var resp ActionProviderConfigureResponse
+	arg := ActionProviderConfigureArgs{
+		Config: conf,
+	}
+
+	err := p.Client.Call("Plugin.Configure", arg, &resp)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type ActionProviderServer struct {
 	Broker   *plugin.MuxBroker
 	Provider achieve.ActionProvider
@@ -58,10 +71,30 @@ func (s *ActionProviderServer) Execute(
 	return nil
 }
 
+func (s *ActionProviderServer) Configure(
+	args *ActionProviderConfigureArgs,
+	result *ActionProviderConfigureResponse) error {
+
+	err := s.Provider.Configure(args.Config)
+	*result = ActionProviderConfigureResponse{
+		Error: plugin.NewBasicError(err),
+	}
+
+	return nil
+}
+
 type ActionProviderExecuteArgs struct {
 	Action *achieve.Action
 }
 
 type ActionProviderExecuteResponse struct {
+	Error *plugin.BasicError
+}
+
+type ActionProviderConfigureArgs struct {
+	Config *achieve.ProviderConfig
+}
+
+type ActionProviderConfigureResponse struct {
 	Error *plugin.BasicError
 }
