@@ -22,9 +22,3 @@ task "release" {
     target_commitish = "master"
   }
 }
-
-task "run" {
-  action "watch" {
-    script = "go run main.go"
-  }
-}

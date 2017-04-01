@@ -37,7 +37,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		if cfgFile == "" { // enable ability to specify config file via flag
-			cfgFile = "tasks.hcl"
+			cfgFile = ".Achievefile"
 		}
 
 		// We don't want to see the plugin logs.

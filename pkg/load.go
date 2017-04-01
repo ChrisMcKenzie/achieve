@@ -36,6 +36,14 @@ func parse(f *ast.File) (*Config, error) {
 
 	conf := new(Config)
 
+	if variables := list.Filter("variable"); len(variables.Items) > 0 {
+		var err error
+		conf.Variables, err = loadVariables(variables)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if tasks := list.Filter("task"); len(tasks.Items) > 0 {
 		var err error
 		conf.Tasks, err = loadTasks(tasks)
@@ -145,6 +153,29 @@ func loadProviders(list *ast.ObjectList) ([]*ProviderConfig, error) {
 		result = append(result, &ProviderConfig{
 			Name:      name,
 			RawConfig: config,
+		})
+	}
+
+	return result, nil
+}
+
+func loadVariables(list *ast.ObjectList) ([]*Variable, error) {
+	list = list.Children()
+	if len(list.Items) == 0 {
+		return nil, nil
+	}
+
+	var result []*Variable
+
+	for _, item := range list.Items {
+		name := item.Keys[0].Token.Value().(string)
+
+		if _, ok := item.Val.(*ast.ObjectType); !ok {
+			return nil, fmt.Errorf("variable '%s': should be an object", name)
+		}
+
+		result = append(result, &Variable{
+			Name: name,
 		})
 	}
 

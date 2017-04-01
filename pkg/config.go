@@ -4,8 +4,15 @@ import "fmt"
 
 // Config ...
 type Config struct {
+	Variables       []*Variable
 	Tasks           map[string]*Task
 	ProviderConfigs []*ProviderConfig
+}
+
+type Variable struct {
+	Name    string
+	Default string
+	Value   string
 }
 
 // GetTask checks if a task exist by the given name and then returns or errors
@@ -26,4 +33,8 @@ func (c *Config) GetProviderConfig(name string) (*ProviderConfig, error) {
 	}
 
 	return nil, fmt.Errorf("Provider Config \"%s\" not found", name)
+}
+
+func (c *Config) Interpolate() {
+
 }
